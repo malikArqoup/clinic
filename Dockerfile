@@ -2,6 +2,7 @@
 FROM node:20 AS frontend-build
 WORKDIR /app/frontend
 COPY clinic-frontend/package*.json ./
+RUN npm install -g @angular/cli@19.2.15
 RUN npm install
 COPY clinic-frontend/ ./
 RUN npm run build --configuration production
