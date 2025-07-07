@@ -6,6 +6,7 @@ from .models import user, availability, booking, slider_image
 from .routes import auth, availability as availability_routes, booking as booking_routes
 from .routes import admin as admin_routes
 from .routes import slider as slider_routes, slider as slider_routes_noprefix
+from .routes import clinic_info
 from sqlalchemy.orm import Session
 from fastapi import Depends
 from .core.database import get_db
@@ -34,7 +35,7 @@ app = FastAPI(
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:4200", "http://127.0.0.1:4200"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
@@ -49,6 +50,7 @@ app.include_router(booking_routes.router)
 app.include_router(admin_routes.router)
 app.include_router(slider_routes.router)
 app.include_router(slider_routes.router, prefix="", tags=["slider_noprefix"])
+app.include_router(clinic_info.router)
 
 @app.get("/")
 async def root():

@@ -13,10 +13,11 @@ from ..crud.booking import admin_delete_booking
 from sqlalchemy import func
 from ..models.slider_image import SliderImage
 from ..schemas.slider_image import SliderImageCreate, SliderImageUpdate, SliderImageOut
-from ..crud.slider_image import get_slider_images, create_slider_image, update_slider_image, delete_slider_image
 import os, shutil
 from app.cloudinary_utils import upload_image_to_cloudinary
 from app.schemas.slider_image import SliderImageOut
+from ..schemas.contact import ContactMessageIn, ContactMessageOut
+from ..models.contact import ContactMessageModel
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
@@ -101,6 +102,13 @@ def search_bookings(
 @router.get("/users", response_model=List[UserOut])
 def get_all_users(db: Session = Depends(get_db), current_user: User = Depends(verify_admin)):
     users = db.query(User).all()
+    return [UserOut.from_orm(u) for u in users]
+
+@router.get("/users/search", response_model=List[UserOut])
+def search_users(q: str, db: Session = Depends(get_db), current_user: User = Depends(verify_admin)):
+    users = db.query(User).filter(
+        (User.name.ilike(f"%{q}%")) | (User.email.ilike(f"%{q}%"))
+    ).all()
     return [UserOut.from_orm(u) for u in users]
 
 @router.post("/booking-settings", response_model=BookingSettings)
@@ -216,3 +224,22 @@ def delete_slider_image_route(
     current_user: User = Depends(verify_admin)
 ):
     return delete_slider_image(db, image_id) 
+
+@router.post("/contact-us")
+def contact_us(message: ContactMessageIn, db: Session = Depends(get_db)):
+    db_message = ContactMessageModel(
+        name=message.name,
+        email=message.email,
+        phone=message.phone,
+        subject=message.subject,
+        message=message.message
+    )
+    db.add(db_message)
+    db.commit()
+    db.refresh(db_message)
+    return {"detail": "تم استلام رسالتك بنجاح!"}
+
+@router.get("/contact-messages", response_model=list[ContactMessageOut])
+def get_contact_messages(db: Session = Depends(get_db), current_user: User = Depends(verify_admin)):
+    messages = db.query(ContactMessageModel).order_by(ContactMessageModel.created_at.desc()).all()
+    return messages 

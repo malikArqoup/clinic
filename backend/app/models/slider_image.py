@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String
-from app.core.database import Base
+from ..core.database import Base
 
 class SliderImage(Base):
     __tablename__ = "slider_images"
