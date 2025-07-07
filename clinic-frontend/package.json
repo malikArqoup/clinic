@@ -4,7 +4,11 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
+<<<<<<< HEAD
     "build": "ng build clinic-frontend --configuration production",
+=======
+    "build": "ng build --configuration production",
+>>>>>>> d5205830cbdc6dff36cd45712f4789dec8cad70b
     "watch": "ng build --watch --configuration development"
   },
   "private": true,
