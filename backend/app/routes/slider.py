@@ -12,4 +12,11 @@ def get_slider_images_public(db: Session = Depends(get_db)):
     """
     Endpoint عام لجلب صور السلايدر (بدون تحقق أدمن)
     """
+    return get_slider_images(db)
+
+@router.get("/admin/slider-images", response_model=List[SliderImageOut])
+def get_slider_images_admin(db: Session = Depends(get_db)):
+    """
+    Endpoint لإدارة السلايدر (admin) لجلب صور السلايدر
+    """
     return get_slider_images(db) 

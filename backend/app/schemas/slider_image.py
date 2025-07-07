@@ -3,9 +3,7 @@ from datetime import datetime
 
 class SliderImageBase(BaseModel):
     title: str
-    text: str | None = None
-    order: int = 0
-    is_active: bool = True
+    description: str
 
 class SliderImageCreate(SliderImageBase):
     pass
@@ -16,7 +14,6 @@ class SliderImageUpdate(SliderImageBase):
 class SliderImageOut(SliderImageBase):
     id: int
     image_url: str
-    created_at: datetime
 
     class Config:
         orm_mode = True 

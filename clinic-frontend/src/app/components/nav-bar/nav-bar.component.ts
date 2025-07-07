@@ -586,6 +586,12 @@ export class NavBarComponent {
     { text: 'تواصل معنا', href: '#contact', icon: 'contact_mail', isActive: false }
   ];
 
+  contactInfo = [
+    { icon: 'phone', value: '0599123456' },
+    { icon: 'email', value: 'info@ramclinic.com' },
+    { icon: 'location_on', value: 'فلسطين - رام الله' }
+  ];
+
   constructor(private router: Router) {}
 
   @HostListener('window:scroll', [])

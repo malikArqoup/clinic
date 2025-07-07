@@ -15,6 +15,8 @@ from ..models.slider_image import SliderImage
 from ..schemas.slider_image import SliderImageCreate, SliderImageUpdate, SliderImageOut
 from ..crud.slider_image import get_slider_images, create_slider_image, update_slider_image, delete_slider_image
 import os, shutil
+from app.cloudinary_utils import upload_image_to_cloudinary
+from app.schemas.slider_image import SliderImageOut
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
@@ -170,28 +172,33 @@ def delete_booking_endpoint(
             detail="Booking not found"
         )
 
-@router.get("/slider-images", response_model=List[SliderImageOut])
-def get_slider_images_route(db: Session = Depends(get_db), current_user: User = Depends(verify_admin)):
-    return get_slider_images(db)
+@router.get("/slider", response_model=list[SliderImageOut])
+def get_slider_images(db: Session = Depends(get_db)):
+    return db.query(SliderImage).all()
 
-@router.post("/slider-images", response_model=SliderImageOut)
-def add_slider_image(
+@router.post("/admin/slider", response_model=SliderImageOut)
+async def create_slider_image(
     title: str = Form(...),
-    text: str = Form(""),
-    order: int = Form(0),
-    is_active: bool = Form(True),
-    file: UploadFile = File(...),
-    db: Session = Depends(get_db),
-    current_user: User = Depends(verify_admin)
+    description: str = Form(...),
+    image: UploadFile = File(...),
+    db: Session = Depends(get_db)
 ):
-    upload_dir = "static/slider"
-    os.makedirs(upload_dir, exist_ok=True)
-    file_path = os.path.join(upload_dir, file.filename)
-    with open(file_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
-    image_url = f"/static/slider/{file.filename}"
-    slider_data = SliderImageCreate(title=title, text=text, order=order, is_active=is_active)
-    return create_slider_image(db, image_url, slider_data)
+    # Validate file type and size
+    if image.content_type not in ["image/jpeg", "image/png"]:
+        raise HTTPException(status_code=400, detail="Only JPG and PNG images are allowed.")
+    contents = await image.read()
+    if len(contents) > 5 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="Image size must be less than 5MB.")
+
+    # Upload to Cloudinary
+    image_url = upload_image_to_cloudinary(contents)
+
+    # Store in DB
+    slider = SliderImage(title=title, description=description, image_url=image_url)
+    db.add(slider)
+    db.commit()
+    db.refresh(slider)
+    return slider
 
 @router.put("/slider-images/{image_id}", response_model=SliderImageOut)
 def update_slider_image_route(

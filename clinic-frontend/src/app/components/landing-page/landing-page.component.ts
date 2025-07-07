@@ -167,9 +167,9 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
         </div>
         <div class="footer-section">
           <h4>معلومات الاتصال</h4>
-          <p>📞 0791234567</p>
-          <p>📧 info&#64;clinic.com</p>
-          <p>📍 عمان، الأردن</p>
+          <p>📞 0599123456</p>
+          <p>📧 info&#64;ramclinic.com</p>
+          <p>📍 فلسطين، رام الله</p>
         </div>
       </div>
       <div class="footer-bottom">

@@ -71,7 +71,7 @@ import { CommonModule } from '@angular/common';
                   <mat-icon>{{ item.icon }}</mat-icon>
                 </div>
                 <div class="info-content">
-                  <h4>{{ item.title }}</h4>
+                  <h4>{{ item.label }}</h4>
                   <p>{{ item.value }}</p>
                 </div>
               </div>
@@ -431,23 +431,23 @@ export class ContactUsComponent {
   contactInfo = [
     {
       icon: 'location_on',
-      title: 'العنوان',
-      value: 'عمان، الأردن - شارع الملكة رانيا'
+      label: 'العنوان',
+      value: 'فلسطين - رام الله، شارع الإرسال'
     },
     {
       icon: 'phone',
-      title: 'الهاتف',
-      value: '0791234567'
+      label: 'الهاتف',
+      value: '0599123456'
     },
     {
       icon: 'email',
-      title: 'البريد الإلكتروني',
-      value: 'info&#64;clinic.com'
+      label: 'البريد الإلكتروني',
+      value: 'info@ramclinic.com'
     },
     {
-      icon: 'schedule',
-      title: 'أوقات العمل',
-      value: 'الأحد - الخميس: 9:00 ص - 5:00 م'
+      icon: 'access_time',
+      label: 'أوقات العمل',
+      value: 'السبت - الخميس: 8:00 ص - 4:00 م'
     }
   ];
 
