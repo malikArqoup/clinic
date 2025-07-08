@@ -627,32 +627,63 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
       padding: 32px 0 32px 0;
     }
     .booking-table {
-      font-size: 1.25rem;
-      min-width: 420px;
+      font-size: 1.22rem;
+      min-width: 700px;
+      max-width: 950px;
       width: 100%;
-      max-width: 600px;
       margin: 0 auto;
       border-radius: 18px;
-      box-shadow: 0 6px 32px rgba(60, 60, 120, 0.10);
+      box-shadow: 0 8px 32px rgba(60, 60, 120, 0.13);
       background: #fff;
-    }
-    .booking-table th, .booking-table td {
-      padding: 18px 20px;
-      text-align: center;
+      border-collapse: separate;
+      border-spacing: 0;
+      overflow: hidden;
     }
     .booking-table th {
-      font-size: 1.15rem;
-      font-weight: 800;
-      color: #3f51b5;
-      background: #f5f7fa;
+      background: linear-gradient(90deg, #7f9cf5 0%, #a78bfa 100%);
+      color: #fff;
+      font-weight: 900;
+      font-size: 1.22rem;
+      padding: 24px 20px;
+      border-bottom: 2.5px solid #e0e7ef;
+      text-align: center;
+      letter-spacing: 0.5px;
     }
     .booking-table td {
-      font-size: 1.13rem;
+      background: #fff;
+      color: #25396f;
+      font-weight: 700;
+      font-size: 1.18rem;
+      padding: 22px 20px;
+      border-bottom: 1.5px solid #f0f4ff;
+      text-align: center;
+    }
+    .booking-table tr:nth-child(even) td {
+      background: #f8fafc;
+    }
+    .booking-table tr:last-child td {
+      border-bottom: none;
     }
     .booking-table .book-btn {
-      font-size: 1.1rem;
-      padding: 8px 24px;
-      border-radius: 10px;
+      background: linear-gradient(90deg, #7f9cf5 0%, #a78bfa 100%);
+      color: #fff;
+      border-radius: 12px;
+      font-size: 1.18rem;
+      font-weight: 900;
+      padding: 14px 38px;
+      border: none;
+      box-shadow: 0 4px 18px rgba(127,156,245,0.13);
+      transition: background 0.2s, box-shadow 0.2s, transform 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      justify-content: center;
+      letter-spacing: 0.5px;
+    }
+    .booking-table .book-btn:hover {
+      background: linear-gradient(90deg, #6c8cf5 0%, #8b7ffa 100%);
+      box-shadow: 0 8px 32px rgba(127,156,245,0.18);
+      transform: scale(1.06);
     }
     .day-label {
       font-weight: 700;
@@ -895,30 +926,36 @@ export class LandingPageComponent implements OnInit {
     .booking-dialog-modern {
       background: #fff;
       border-radius: 32px;
-      box-shadow: 0 12px 40px rgba(60, 60, 120, 0.13);
-      padding: 38px 22px 22px 22px;
-      max-width: 410px;
+      box-shadow: 0 16px 48px rgba(60, 60, 120, 0.18);
+      padding: 48px 32px 32px 32px;
+      max-width: 440px;
       margin: 0 auto;
       font-family: 'Cairo', 'Tajawal', Arial, sans-serif;
       transition: box-shadow 0.3s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
     .booking-title {
       text-align: center;
       color: #3f51b5;
-      font-weight: 800;
-      margin-bottom: 22px;
-      font-size: 1.35rem;
-      letter-spacing: 0.5px;
+      font-weight: 900;
+      margin-bottom: 28px;
+      font-size: 1.5rem;
+      letter-spacing: 0.7px;
     }
     .booking-day {
       color: #ff9800;
       font-weight: 900;
-      font-size: 1.1em;
+      font-size: 1.18em;
     }
     .booking-form {
       display: flex;
       flex-direction: column;
-      gap: 22px;
+      gap: 28px;
+      width: 100%;
+      max-width: 340px;
+      margin: 0 auto;
     }
     .mat-form-field {
       width: 100%;
@@ -930,28 +967,51 @@ export class LandingPageComponent implements OnInit {
     .mat-input-element, .mat-select-trigger {
       border-radius: 18px !important;
       background: #f8fafc !important;
+      font-size: 1.13rem;
+      font-weight: 600;
+      color: #25396f;
+      padding: 12px 14px;
+    }
+    .mat-form-field-appearance-outline.mat-focused .mat-form-field-outline {
+      border-color: #7f9cf5 !important;
+      box-shadow: 0 0 0 2px #a78bfa33 !important;
     }
     .confirm-btn {
-      margin-top: 12px;
-      font-weight: 700;
-      border-radius: 18px;
-      font-size: 1.13rem;
-      letter-spacing: 0.5px;
-      box-shadow: 0 2px 8px rgba(63,81,181,0.08);
-      background: linear-gradient(90deg, #3f51b5 60%, #ff9800 100%);
+      margin-top: 18px;
+      font-weight: 900;
+      border-radius: 22px;
+      font-size: 1.18rem;
+      letter-spacing: 0.7px;
+      box-shadow: 0 4px 18px rgba(63,81,181,0.10);
+      background: linear-gradient(90deg, #3f51b5 0%, #ff9800 100%);
       color: #fff;
-      transition: background 0.2s, box-shadow 0.2s;
+      padding: 16px 0;
+      transition: background 0.2s, box-shadow 0.2s, transform 0.2s;
+      width: 100%;
+      max-width: 320px;
+      margin-left: auto;
+      margin-right: auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     .confirm-btn:hover {
       background: linear-gradient(90deg, #ff9800 0%, #3f51b5 100%);
-      box-shadow: 0 4px 16px rgba(63,81,181,0.13);
+      box-shadow: 0 8px 32px rgba(63,81,181,0.13);
+      transform: scale(1.04);
     }
     .cancel-btn {
       color: #888 !important;
-      font-weight: 600;
+      font-weight: 700;
       margin-top: 0;
-      border-radius: 12px;
+      border-radius: 14px;
       transition: background 0.2s;
+      width: 100%;
+      max-width: 320px;
+      margin-left: auto;
+      margin-right: auto;
+      text-align: center;
+      padding: 10px 0;
     }
     .cancel-btn:hover {
       background: #f5f5f5;
@@ -960,9 +1020,9 @@ export class LandingPageComponent implements OnInit {
       text-align: center;
       color: #f44336;
       background: #ffebee;
-      border-radius: 10px;
-      padding: 12px;
-      font-size: 1rem;
+      border-radius: 12px;
+      padding: 14px;
+      font-size: 1.08rem;
       margin-bottom: 8px;
     }
   `

@@ -4,7 +4,7 @@ from typing import List
 from ..core.database import get_db
 from ..models.user import User
 from ..models.booking import Booking
-from ..schemas.user import UserOut
+from ..schemas.user import UserOut, UserUpdate
 from ..schemas.booking import BookingOut, BookingCreate, BookingUpdate
 from ..schemas.availability import BookingSettingsCreate, BookingSettings
 from ..auth.dependencies import get_current_user
@@ -17,6 +17,7 @@ import os, shutil
 from app.cloudinary_utils import upload_image_to_cloudinary
 from ..schemas.contact import ContactMessageIn, ContactMessageOut
 from ..models.contact import ContactMessageModel
+from ..crud.user import update_user as crud_update_user, delete_user as crud_delete_user
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
@@ -309,4 +310,17 @@ def contact_us(message: ContactMessageIn, db: Session = Depends(get_db)):
 @router.get("/contact-messages", response_model=list[ContactMessageOut])
 def get_contact_messages(db: Session = Depends(get_db), current_user: User = Depends(verify_admin)):
     messages = db.query(ContactMessageModel).order_by(ContactMessageModel.created_at.desc()).all()
-    return messages 
+    return messages
+
+@router.put("/users/{user_id}", response_model=UserOut)
+def update_user_endpoint(user_id: int, user_update: UserUpdate, db: Session = Depends(get_db), current_user: User = Depends(verify_admin)):
+    user = crud_update_user(db, user_id, user_update.dict(exclude_unset=True))
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return UserOut.from_orm(user)
+
+@router.delete("/users/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_user_endpoint(user_id: int, db: Session = Depends(get_db), current_user: User = Depends(verify_admin)):
+    success = crud_delete_user(db, user_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="User not found") 

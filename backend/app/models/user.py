@@ -16,6 +16,7 @@ class User(Base):
         gender: User's gender
         hashed_password: Hashed password string
         role: User role (admin or patient)
+        status: User status (active or inactive)
     """
     __tablename__ = "users"
 
@@ -26,4 +27,5 @@ class User(Base):
     age = Column(Integer, nullable=False)
     gender = Column(String, nullable=False)
     hashed_password = Column(String, nullable=False)
-    role = Column(String, nullable=False) 
+    role = Column(String, nullable=False)
+    # status = Column(String, nullable=False, default='active')  # تم إلغاء الحقل 

@@ -27,13 +27,13 @@ import { AuthService } from '../../services/auth.service';
           <div class="contact-form-container">
             <h3 class="form-title">أرسل لنا رسالة</h3>
         <form class="contact-form" (ngSubmit)="onSubmit()">
-              <mat-form-field appearance="outline" class="form-field">
+              <mat-form-field appearance="fill" class="form-field">
                 <mat-label>موضوع الرسالة</mat-label>
                 <input matInput [(ngModel)]="subject" name="subject" placeholder="أدخل موضوع الرسالة" required>
                 <mat-icon matSuffix>subject</mat-icon>
           </mat-form-field>
               
-              <mat-form-field appearance="outline" class="form-field">
+              <mat-form-field appearance="fill" class="form-field">
             <mat-label>رسالتك</mat-label>
                 <textarea matInput rows="4" required [(ngModel)]="message" name="message" placeholder="اكتب رسالتك هنا..."></textarea>
                 <mat-icon matSuffix>message</mat-icon>
@@ -156,57 +156,120 @@ import { AuthService } from '../../services/auth.service';
     }
     
     .contact-form-container {
-      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-      padding: 32px;
-      border-radius: 16px;
-      border: 1px solid #e2e8f0;
+      background: #fff;
+      padding: 40px 36px 36px 36px;
+      border-radius: 22px;
+      border: 1px solid #e0e7ef;
+      box-shadow: 0 6px 32px rgba(63, 81, 181, 0.09);
+      transition: box-shadow 0.3s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
-    
+    .contact-form-container:hover {
+      box-shadow: 0 8px 32px rgba(63, 81, 181, 0.13);
+    }
     .form-title {
-      font-size: 1.5rem;
-      font-weight: 600;
-      margin-bottom: 24px;
-      color: #1e293b;
+      font-size: 1.7rem;
+      font-weight: 800;
+      margin-bottom: 32px;
+      color: #25396f;
       text-align: center;
+      letter-spacing: 0.7px;
     }
-    
     .contact-form {
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 28px;
+      width: 100%;
+      max-width: 480px;
+      margin: 0 auto;
     }
-    
     .form-field {
       width: 100%;
     }
-    
-    .form-field ::ng-deep .mat-mdc-form-field {
-      width: 100%;
+    .form-field ::ng-deep .mat-mdc-form-field,
+    .form-field ::ng-deep .mat-mdc-form-field.mat-focused,
+    .form-field ::ng-deep .mat-mdc-form-field-outline,
+    .form-field ::ng-deep .mat-mdc-form-field-outline-thick,
+    .form-field ::ng-deep .mat-mdc-form-field-outline-start,
+    .form-field ::ng-deep .mat-mdc-form-field-outline-end {
+      border: none !important;
+      stroke: none !important;
+      box-shadow: none !important;
+      background: transparent !important;
     }
-    
     .form-field ::ng-deep .mat-mdc-text-field-wrapper {
-      background: white;
-      border-radius: 8px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #fafdff 60%, #e9f0fb 100%) !important;
+      box-shadow: 0 1.5px 8px rgba(120, 139, 250, 0.06);
+      border: none !important;
+      transition: box-shadow 0.2s, background 0.2s;
+      min-height: 56px;
     }
-    
+    .form-field ::ng-deep .mat-mdc-form-field.mat-focused .mat-mdc-text-field-wrapper {
+      box-shadow: 0 0 0 6px #a78bfa33, 0 4px 24px #a78bfa22;
+      background: #f0f4ff !important;
+      transition: box-shadow 0.3s cubic-bezier(.4,1.3,.6,1), background 0.2s;
+    }
+    .form-field input[matInput],
+    .form-field textarea[matInput] {
+      font-size: 1.13rem;
+      color: #25396f;
+      border-radius: 12px;
+      background: transparent;
+      padding: 14px 14px 14px 40px;
+      min-height: 44px;
+      border: none;
+      outline: none;
+      box-shadow: none;
+      font-family: 'Cairo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .form-field textarea[matInput] {
+      min-height: 100px;
+      resize: vertical;
+    }
+    .form-field mat-icon {
+      color: #7f9cf5;
+      font-size: 26px;
+      margin-right: 6px;
+      margin-top: 2px;
+    }
     .submit-btn {
-      font-size: 1.1rem;
-      font-weight: 600;
-      padding: 12px 32px;
-      border-radius: 50px;
-      margin-top: 16px;
+      font-size: 1.22rem;
+      font-weight: 800;
+      padding: 16px 0;
+      border-radius: 32px;
+      margin-top: 10px;
+      background: linear-gradient(90deg, #7f9cf5 0%, #a78bfa 100%);
+      color: #fff;
+      box-shadow: 0 4px 18px rgba(127,156,245,0.13);
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
-      background: linear-gradient(135deg, #3f51b5 0%, #5c6bc0 100%);
-      box-shadow: 0 4px 16px rgba(63, 81, 181, 0.3);
-      transition: all 0.3s ease;
+      gap: 12px;
+      letter-spacing: 0.7px;
+      transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+      width: 100%;
+      max-width: 320px;
+      margin-left: auto;
+      margin-right: auto;
+      animation: btnPopIn 0.8s cubic-bezier(.4,1.3,.6,1);
     }
-    
-    .submit-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(63, 81, 181, 0.4);
+    .submit-btn mat-icon {
+      font-size: 28px;
+      margin-left: 8px;
+    }
+    .submit-btn:disabled {
+      background: #e0e7ff;
+      color: #b4b4b4;
+      box-shadow: none;
+    }
+    .submit-btn:hover:not(:disabled) {
+      background: linear-gradient(90deg, #6c8cf5 0%, #8b7ffa 100%);
+      transform: scale(1.04);
+      box-shadow: 0 6px 24px rgba(127,156,245,0.18);
+      animation: btnPulse 0.7s cubic-bezier(.4,1.3,.6,1) infinite alternate;
     }
     
     .contact-info-container {
@@ -403,6 +466,26 @@ import { AuthService } from '../../services/auth.service';
       .social-icons {
         justify-content: center;
       }
+    }
+    
+    /* أنيميشن ظهور الحقول */
+    .contact-form .form-field {
+      opacity: 0;
+      transform: translateY(24px);
+      animation: fadeSlideIn 0.9s cubic-bezier(.4,1.3,.6,1) forwards;
+    }
+    .contact-form .form-field:nth-child(1) { animation-delay: 0.1s; }
+    .contact-form .form-field:nth-child(2) { animation-delay: 0.25s; }
+    @keyframes fadeSlideIn {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    /* زر الإرسال ينبض عند المرور */
+    @keyframes btnPulse {
+      0% { box-shadow: 0 4px 18px #a78bfa33, 0 0 0 0 #a78bfa33; }
+      100% { box-shadow: 0 8px 32px #a78bfa55, 0 0 0 8px #a78bfa22; }
     }
   `
 })

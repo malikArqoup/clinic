@@ -62,4 +62,13 @@ class UserOut(BaseModel):
     access_token: Optional[str] = None
 
     class Config:
-        from_attributes = True 
+        orm_mode = True
+
+class UserUpdate(BaseModel):
+    name: Optional[str] = None
+    email: Optional[EmailStr] = None
+    phone_number: Optional[str] = None
+    age: Optional[int] = None
+    gender: Optional[str] = None
+    role: Optional[str] = None
+    status: Optional[str] = None 

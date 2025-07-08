@@ -96,4 +96,23 @@ def authenticate_user(db: Session, email: str, password: str) -> User:
         return None
     if not verify_password(password, user.hashed_password):
         return None
-    return user 
+    return user
+
+def update_user(db: Session, user_id: int, user_update: dict) -> User:
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        return None
+    for field, value in user_update.items():
+        if value is not None and hasattr(user, field):
+            setattr(user, field, value)
+    db.commit()
+    db.refresh(user)
+    return user
+
+def delete_user(db: Session, user_id: int) -> bool:
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        return False
+    db.delete(user)
+    db.commit()
+    return True 

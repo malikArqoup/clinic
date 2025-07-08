@@ -88,3 +88,69 @@ table {
     margin-bottom: 1rem;
   }
 }
+
+/* تحسين مظهر صندوق البحث في إدارة الحجوزات */
+.pro-search-field .mat-mdc-form-field-outline {
+  border-width: 0 !important;
+}
+.pro-search-field .mat-mdc-form-field-outline-thick {
+  border-width: 0 !important;
+}
+.pro-search-field .mat-mdc-form-field-flex {
+  background: #f8f9fa;
+  border-radius: 12px;
+  box-shadow: 0 1px 4px rgba(60,60,60,0.07);
+  border: 1px solid #e0e0e0;
+}
+.pro-search-field input.mat-mdc-input-element {
+  background: transparent;
+  box-shadow: none;
+  border: none;
+}
+
+.custom-search-bar {
+  display: flex;
+  align-items: center;
+  background: #f8f9fa;
+  border-radius: 12px;
+  box-shadow: 0 1px 4px rgba(60,60,60,0.07);
+  border: 1px solid #e0e0e0;
+  padding: 0 12px;
+  width: 320px;
+  height: 44px;
+  position: relative;
+}
+.custom-search-bar .search-icon {
+  margin-left: 8px;
+  display: flex;
+  align-items: center;
+}
+.custom-search-bar input[type="search"] {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 15px;
+  color: #374151;
+  flex: 1;
+  padding: 8px 8px 8px 0;
+}
+.custom-search-bar input[type="search"]::placeholder {
+  color: #9ca3af;
+  font-size: 14px;
+}
+.custom-search-bar .clear-btn {
+  background: none;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  margin-right: 8px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+}
+.custom-search-bar .clear-btn svg {
+  transition: background 0.2s;
+}
+.custom-search-bar .clear-btn:hover svg circle {
+  fill: #ef4444;
+}

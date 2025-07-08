@@ -14,4 +14,4 @@ class ClinicInfoOut(BaseModel):
     address: str
 
     class Config:
-        from_attributes = True 
+        orm_mode = True 

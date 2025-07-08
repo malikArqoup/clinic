@@ -23,6 +23,7 @@ import { ClinicService, SliderImage, User, DashboardStats, BookingOut } from '..
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { EditAppointmentDialogComponent } from '../edit-appointment-dialog/edit-appointment-dialog.component';
 import { AddSliderImageDialogComponent } from './add-slider-image-dialog.component';
+import { EditUserDialogComponent } from './edit-user-dialog.component';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -178,17 +179,29 @@ import { AddSliderImageDialogComponent } from './add-slider-image-dialog.compone
                   </button>
                 </div>
                 <!-- مربع البحث الموحد أعلى كل جدول -->
-                <div class="search-box pro-search" style="margin-bottom: 24px;">
-                  <mat-form-field appearance="outline" class="pro-search-field" style="width: 100%; max-width: 400px;">
-                    <mat-label>ابحث بالاسم أو البريد الإلكتروني...</mat-label>
-                    <input matInput [(ngModel)]="searchAppointmentQuery" (keyup.enter)="searchAppointments()" (input)="onSearchInputAppointments()">
-                    <button mat-icon-button matSuffix (click)="searchAppointments()" matTooltip="بحث">
-                      <mat-icon>search</mat-icon>
+                <div style="display: flex; justify-content: flex-start; margin-bottom: 24px;">
+                  <div class="custom-search-bar">
+                    <span class="search-icon">
+                      <svg width="24" height="24" fill="none" stroke="#3f51b5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"/>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                      </svg>
+                    </span>
+                    <input
+                      type="search"
+                      [(ngModel)]="searchAppointmentQuery"
+                      (keyup.enter)="searchAppointments()"
+                      (input)="onSearchInputAppointments()"
+                      placeholder="ابحث..."
+                    />
+                    <button *ngIf="searchAppointmentQuery" class="clear-btn" (click)="clearSearchAppointments()">
+                      <svg width="20" height="20" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="10" cy="10" r="10" fill="#3f51b5"/>
+                        <line x1="7" y1="7" x2="13" y2="13"/>
+                        <line x1="13" y1="7" x2="7" y2="13"/>
+                      </svg>
                     </button>
-                    <button mat-icon-button matSuffix *ngIf="searchAppointmentQuery" (click)="clearSearchAppointments()" matTooltip="مسح البحث">
-                      <mat-icon>clear</mat-icon>
-                    </button>
-                  </mat-form-field>
+                  </div>
                 </div>
               </div>
 
@@ -1758,8 +1771,23 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
 
   // Placeholder for user edit functionality
   editUser(user: any) {
-    // TODO: Implement user editing dialog or logic here
-    console.log('Edit user:', user);
+    const dialogRef = this.dialog.open(EditUserDialogComponent, {
+      width: '400px',
+      data: { user }
+    });
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.clinicService.updateUser(user.id, result).subscribe({
+          next: () => {
+            this.snackBar.open('تم تحديث المستخدم بنجاح', 'إغلاق', { duration: 3000 });
+            this.loadDashboardData();
+          },
+          error: () => {
+            this.snackBar.open('حدث خطأ أثناء تحديث المستخدم', 'إغلاق', { duration: 3000 });
+          }
+        });
+      }
+    });
   }
 
   // Helper methods for status

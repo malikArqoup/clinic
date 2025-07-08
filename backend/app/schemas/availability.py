@@ -37,7 +37,7 @@ class Availability(AvailabilityBase):
     created_at: datetime
 
     class Config:
-        from_attributes = True
+        orm_mode = True
 
 class WorkingHours(BaseModel):
     enabled: bool
@@ -57,7 +57,7 @@ class BookingSettings(BookingSettingsBase):
     updated_at: datetime
 
     class Config:
-        from_attributes = True
+        orm_mode = True
 
 class AvailabilityOut(BaseModel):
     """
@@ -78,7 +78,7 @@ class AvailabilityOut(BaseModel):
     created_at: datetime
 
     class Config:
-        from_attributes = True
+        orm_mode = True
 
 class AvailabilityList(BaseModel):
     """

@@ -34,11 +34,6 @@ import { AuthService } from '../../services/auth.service';
         </div>
         <mat-card-header>
           <mat-card-title>تسجيل الدخول - عيادة طبية</mat-card-title>
-          <div class="login-mode-toggle">
-            <button mat-button (click)="toggleLoginMode()" class="toggle-btn">
-              {{ isAdminLogin ? 'تسجيل دخول المريض' : 'تسجيل دخول الأدمن' }}
-            </button>
-          </div>
         </mat-card-header>
         <mat-card-content>
           <form [formGroup]="form" (ngSubmit)="login()" class="login-form">
