@@ -10,6 +10,7 @@ import { FormControl } from '@angular/forms';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatSelectModule } from '@angular/material/select';
 import { MatNativeDateModule } from '@angular/material/core';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-booking-form',
@@ -29,18 +30,20 @@ import { MatNativeDateModule } from '@angular/material/core';
     <div class="booking-card">
       <form [formGroup]="form" class="booking-form" (ngSubmit)="submit()">
         <h2 class="booking-title">حجز موعد جديد</h2>
-        <mat-form-field appearance="fill">
-          <mat-label>الاسم الكامل</mat-label>
-          <input matInput formControlName="name" required>
-        </mat-form-field>
-        <mat-form-field appearance="fill">
-          <mat-label>رقم الهاتف</mat-label>
-          <input matInput formControlName="phone" required>
-        </mat-form-field>
-        <mat-form-field appearance="fill">
-          <mat-label>البريد الإلكتروني</mat-label>
-          <input matInput formControlName="email" required type="email">
-        </mat-form-field>
+        <ng-container *ngIf="!isLoggedIn">
+          <mat-form-field appearance="fill">
+            <mat-label>الاسم الكامل</mat-label>
+            <input matInput formControlName="name" required>
+          </mat-form-field>
+          <mat-form-field appearance="fill">
+            <mat-label>رقم الهاتف</mat-label>
+            <input matInput formControlName="phone" required>
+          </mat-form-field>
+          <mat-form-field appearance="fill">
+            <mat-label>البريد الإلكتروني</mat-label>
+            <input matInput formControlName="email" required type="email">
+          </mat-form-field>
+        </ng-container>
         <mat-form-field appearance="fill">
           <mat-label>تاريخ الحجز</mat-label>
           <input matInput [matDatepicker]="picker" formControlName="date" required (dateChange)="onDateChange($event)">
@@ -54,7 +57,7 @@ import { MatNativeDateModule } from '@angular/material/core';
           </mat-select>
         </mat-form-field>
         <div class="actions">
-          <button mat-raised-button color="primary" class="confirm-btn" type="submit" [disabled]="form.invalid || !availableSlots.length">تأكيد الحجز</button>
+          <button mat-raised-button color="primary" class="confirm-btn" type="submit" [disabled]="isLoggedIn ? form.get('date')?.invalid || form.get('slot')?.invalid || !availableSlots.length : form.invalid || !availableSlots.length">تأكيد الحجز</button>
           <button mat-button class="cancel-btn" type="button" (click)="form.reset()">إلغاء</button>
         </div>
       </form>
@@ -111,21 +114,41 @@ import { MatNativeDateModule } from '@angular/material/core';
   `]
 })
 export class BookingFormComponent implements OnInit {
-  form: FormGroup;
+  form!: FormGroup;
   availableSlots: string[] = [];
+  isLoggedIn = false;
+  currentUser: any = null;
 
-  constructor(private fb: FormBuilder, private clinicService: ClinicService, private snackBar: MatSnackBar) {
+  constructor(
+    private fb: FormBuilder,
+    private clinicService: ClinicService,
+    private snackBar: MatSnackBar,
+    private authService: AuthService
+  ) {}
+
+  ngOnInit() {
+    this.currentUser = this.authService.getCurrentUser();
+    this.isLoggedIn = !!this.currentUser;
+    // أعد تهيئة النموذج بناءً على حالة تسجيل الدخول
     this.form = this.fb.group({
-      name: ['', Validators.required],
-      phone: ['', Validators.required],
-      email: ['', [Validators.required, Validators.email]],
+      name: ['', this.isLoggedIn ? [] : Validators.required],
+      phone: ['', this.isLoggedIn ? [] : Validators.required],
+      email: ['', this.isLoggedIn ? [] : [Validators.required, Validators.email]],
       date: ['', Validators.required],
       slot: ['', Validators.required]
     });
-  }
-
-  ngOnInit() {
-    // لا شيء هنا حالياً
+    if (this.isLoggedIn && !this.currentUser) {
+      this.clinicService.getCurrentUser().subscribe({
+        next: user => {
+          this.currentUser = user;
+          this.isLoggedIn = true;
+        },
+        error: () => {
+          this.currentUser = null;
+          this.isLoggedIn = false;
+        }
+      });
+    }
   }
 
   onDateChange(event: any) {
@@ -154,16 +177,19 @@ export class BookingFormComponent implements OnInit {
     if (this.form.valid) {
       const { name, phone, email, date, slot } = this.form.value;
       if (!slot) return;
-      // slot format: "10:00 AM - 10:30 AM"
       const [start_time, end_time] = slot.split(' - ');
-      const payload = {
-        name,
-        phone_number: phone,
-        email,
+      const payload: any = {
         date: this.formatDate(date),
         start_time: start_time.trim(),
         end_time: end_time.trim()
       };
+      // فقط إذا لم يكن مسجل دخول أرسل بيانات المستخدم
+      if (!this.isLoggedIn) {
+        payload.name = name;
+        payload.phone_number = phone;
+        payload.email = email;
+      }
+      // إذا كان مسجل دخول لا ترسل بيانات المستخدم، الباكند سيأخذها من التوكن
       this.clinicService.createAppointment(payload).subscribe({
         next: () => {
           this.snackBar.open('تم إرسال طلب الحجز بنجاح!', 'إغلاق', { duration: 3000 });

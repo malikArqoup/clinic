@@ -20,7 +20,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ClinicService, SliderImage, User, DashboardStats, BookingOut } from '../../services/clinic.service';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { EditAppointmentDialogComponent } from '../edit-appointment-dialog/edit-appointment-dialog.component';
 import { AddSliderImageDialogComponent } from './add-slider-image-dialog.component';
 
@@ -71,6 +71,10 @@ import { AddSliderImageDialogComponent } from './add-slider-image-dialog.compone
                 <span class="admin-name">مدير النظام</span>
                 <span class="admin-role">Administrator</span>
               </div>
+              <!-- زر تسجيل الخروج الجديد -->
+              <button mat-icon-button color="warn" (click)="logout()" matTooltip="تسجيل الخروج" style="margin-right: 8px; margin-top: 4px;">
+                <mat-icon>logout</mat-icon>
+              </button>
             </div>
           </div>
         </div>
@@ -97,7 +101,7 @@ import { AddSliderImageDialogComponent } from './add-slider-image-dialog.compone
 
       <!-- Main Content -->
       <section class="main-content">
-        <mat-tab-group class="dashboard-tabs" animationDuration="300ms">
+        <mat-tab-group class="dashboard-tabs" animationDuration="300ms" (selectedTabChange)="onTabChange($event)">
           
           <!-- Dashboard Overview -->
           <mat-tab label="لوحة التحكم">
@@ -173,14 +177,15 @@ import { AddSliderImageDialogComponent } from './add-slider-image-dialog.compone
                     تصدير
                   </button>
                 </div>
-                <div class="search-box">
-                  <mat-form-field appearance="outline">
-                    <mat-label>البحث في الحجوزات</mat-label>
-                    <input matInput placeholder="اكتب اسم المريض أو رقم الهاتف..." [(ngModel)]="searchQuery" (keyup.enter)="searchAppointments()" (input)="onSearchInput()">
+                <!-- مربع البحث الموحد أعلى كل جدول -->
+                <div class="search-box pro-search" style="margin-bottom: 24px;">
+                  <mat-form-field appearance="outline" class="pro-search-field" style="width: 100%; max-width: 400px;">
+                    <mat-label>ابحث بالاسم أو البريد الإلكتروني...</mat-label>
+                    <input matInput [(ngModel)]="searchAppointmentQuery" (keyup.enter)="searchAppointments()" (input)="onSearchInputAppointments()">
                     <button mat-icon-button matSuffix (click)="searchAppointments()" matTooltip="بحث">
                       <mat-icon>search</mat-icon>
                     </button>
-                    <button mat-icon-button matSuffix *ngIf="searchQuery" (click)="clearSearch()" matTooltip="مسح البحث">
+                    <button mat-icon-button matSuffix *ngIf="searchAppointmentQuery" (click)="clearSearchAppointments()" matTooltip="مسح البحث">
                       <mat-icon>clear</mat-icon>
                     </button>
                   </mat-form-field>
@@ -188,7 +193,7 @@ import { AddSliderImageDialogComponent } from './add-slider-image-dialog.compone
               </div>
 
               <!-- Search Results Info -->
-              <div *ngIf="searchQuery && !loading" class="search-results-info">
+              <div *ngIf="searchAppointmentQuery && !loading" class="search-results-info">
                 <span>نتائج البحث: {{ appointments.length }} حجز</span>
               </div>
 
@@ -310,17 +315,33 @@ import { AddSliderImageDialogComponent } from './add-slider-image-dialog.compone
                     تصفية
                   </button>
                 </div>
-                <div class="search-box">
-                  <mat-form-field appearance="outline">
-                    <mat-label>البحث في المستخدمين</mat-label>
-                    <input matInput placeholder="اسم المستخدم، البريد الإلكتروني...">
-                    <mat-icon matSuffix>search</mat-icon>
-                  </mat-form-field>
+                <!-- شريط البحث العصري للمستخدمين -->
+                <div style="display: flex; justify-content: flex-start; margin: 24px 0 18px 0;">
+                  <div class="custom-search-bar">
+                    <span class="search-icon">
+                      <svg width="24" height="24" fill="none" stroke="#3f51b5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"/>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                      </svg>
+                    </span>
+                    <input
+                      type="search"
+                      [(ngModel)]="searchUserQuery"
+                      (keyup.enter)="searchUsers()"
+                      (input)="onSearchInputUsers()"
+                      placeholder="ابحث بالاسم أو البريد الإلكتروني..."
+                    />
+                    <button *ngIf="searchUserQuery" class="clear-btn" (click)="clearSearchUsers()">
+                      <svg width="20" height="20" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="10" cy="10" r="10" fill="#3f51b5"/>
+                        <line x1="7" y1="7" x2="13" y2="13"/>
+                        <line x1="13" y1="7" x2="7" y2="13"/>
+                      </svg>
+                    </button>
+                  </div>
                 </div>
-              </div>
-
-              <div class="users-table">
-                <table mat-table [dataSource]="users" class="mat-elevation-z8">
+                <!-- جدول المستخدمين -->
+                <table mat-table [dataSource]="users" class="mat-elevation-z8 custom-table" *ngIf="!loading">
                   <!-- Avatar Column -->
                   <ng-container matColumnDef="avatar">
                     <th mat-header-cell *matHeaderCellDef>الصورة</th>
@@ -367,7 +388,8 @@ import { AddSliderImageDialogComponent } from './add-slider-image-dialog.compone
                   <ng-container matColumnDef="actions">
                     <th mat-header-cell *matHeaderCellDef>الإجراءات</th>
                     <td mat-cell *matCellDef="let element">
-                      <button mat-icon-button color="primary" matTooltip="تعديل">
+                      <!-- زر القلم (تعديل) يظهر فقط إذا كان هناك دالة تعديل -->
+                      <button mat-icon-button color="primary" matTooltip="تعديل" *ngIf="canEditUser(element)" (click)="editUser(element)">
                         <mat-icon>edit</mat-icon>
                       </button>
                       <button mat-icon-button color="warn" matTooltip="حذف" (click)="deleteUser(element)">
@@ -391,23 +413,27 @@ import { AddSliderImageDialogComponent } from './add-slider-image-dialog.compone
               <div class="settings-grid">
                 <div class="settings-card">
                   <h3>إعدادات عامة</h3>
-                  <div class="setting-item">
-                    <label>اسم العيادة</label>
-                    <input type="text" value="عيادة الشفاء" class="setting-input">
-                  </div>
-                  <div class="setting-item">
-                    <label>رقم الهاتف</label>
-                    <input type="tel" value="0791234567" class="setting-input">
-                  </div>
-                  <div class="setting-item">
-                    <label>البريد الإلكتروني</label>
-                    <input type="email" value="info@clinic.com" class="setting-input">
-                  </div>
-                  <div class="setting-item">
-                    <label>العنوان</label>
-                    <textarea class="setting-input">عمان، الأردن - شارع الملكة رانيا</textarea>
+                  <form [formGroup]="clinicInfoForm" (ngSubmit)="saveClinicInfo()">
+                    <div class="setting-item">
+                      <label>اسم العيادة</label>
+                      <input type="text" formControlName="name" class="setting-input">
+                    </div>
+                    <div class="setting-item">
+                      <label>رقم الهاتف</label>
+                      <input type="tel" formControlName="phone" class="setting-input">
+                    </div>
+                    <div class="setting-item">
+                      <label>البريد الإلكتروني</label>
+                      <input type="email" formControlName="email" class="setting-input">
+                    </div>
+                    <div class="setting-item">
+                      <label>العنوان</label>
+                      <textarea formControlName="address" class="setting-input"></textarea>
           </div>
-                  <button mat-raised-button color="primary">حفظ الإعدادات</button>
+                    <button mat-raised-button color="primary" [disabled]="clinicInfoForm.invalid || savingClinicInfo">
+                      {{ savingClinicInfo ? 'جاري الحفظ...' : 'حفظ الإعدادات' }}
+                    </button>
+                  </form>
       </div>
 
                 <div class="settings-card">
@@ -451,6 +477,36 @@ import { AddSliderImageDialogComponent } from './add-slider-image-dialog.compone
                   </div>
                 </div>
               </div>
+            </div>
+          </mat-tab>
+
+          <!-- رسائل التواصل -->
+          <mat-tab label="رسائل التواصل">
+            <div class="tab-content">
+              <h2 style="margin-bottom: 16px;">رسائل التواصل</h2>
+              <table class="mat-elevation-z8 custom-table" *ngIf="contactMessages.length > 0">
+                <thead>
+                  <tr>
+                    <th>الاسم</th>
+                    <th>البريد الإلكتروني</th>
+                    <th>رقم الهاتف</th>
+                    <th>الموضوع</th>
+                    <th>الرسالة</th>
+                    <th>تاريخ الإرسال</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let msg of contactMessages">
+                    <td>{{ msg.name }}</td>
+                    <td>{{ msg.email }}</td>
+                    <td>{{ msg.phone || '-' }}</td>
+                    <td>{{ msg.subject || '-' }}</td>
+                    <td>{{ msg.message }}</td>
+                    <td>{{ msg.created_at | date:'short' }}</td>
+                  </tr>
+                </tbody>
+              </table>
+              <div *ngIf="contactMessages.length === 0" style="text-align:center; color:#888;">لا توجد رسائل بعد.</div>
             </div>
           </mat-tab>
 
@@ -1207,6 +1263,196 @@ import { AddSliderImageDialogComponent } from './add-slider-image-dialog.compone
         padding: 8px 6px;
       }
     }
+
+    /* توحيد ستايل الجداول */
+    .custom-table {
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+      background: #fff;
+      margin-top: 12px;
+    }
+    .custom-table th {
+      background: #3f51b5;
+      color: #fff;
+      font-weight: bold;
+      font-size: 16px;
+      padding: 14px 8px;
+    }
+    .custom-table td {
+      font-size: 15px;
+      padding: 14px 8px;
+    }
+    .custom-table tr {
+      transition: background 0.2s;
+    }
+    .custom-table tr:hover {
+      background: #f0f4ff;
+    }
+
+    /* أزرار الإجراءات */
+    .custom-table .action-btn {
+      margin: 0 2px;
+      border-radius: 50%;
+      min-width: 36px;
+      width: 36px;
+      height: 36px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* شريط البحث الكبير والمرتب */
+    .pro-search {
+      margin: 0 0 18px 0;
+      display: flex;
+      justify-content: flex-start;
+      background: transparent !important;
+      box-shadow: none !important;
+    }
+    .custom-search-bar {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      max-width: 500px;
+      background: #f5f8ff;
+      border: none;
+      border-radius: 999px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+      padding: 0 12px;
+      height: 54px;
+      margin: 0;
+    }
+    .custom-search-bar input {
+      border: none;
+      outline: none;
+      background: transparent;
+      flex: 1;
+      font-size: 20px;
+      padding: 0 12px;
+      border-radius: 999px;
+    }
+    .search-icon-btn, .clear-icon-btn {
+      background: none;
+      border: none;
+      outline: none;
+      cursor: pointer;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+    .search-icon-btn:hover, .clear-icon-btn:hover {
+      background: #e3e8f0;
+    }
+    .custom-search-bar mat-icon {
+      font-size: 28px;
+      color: #3f51b5;
+    }
+    .custom-search-bar input::placeholder {
+      color: #b0b3b8;
+      opacity: 1;
+      font-size: 18px;
+    }
+  .search {
+    display: block;
+    width: 100%;
+    max-width: 500px;
+    margin: 24px auto 18px auto;
+    cursor: pointer;
+    opacity: 0.9;
+    transition: opacity .3s;
+    position: relative;
+  }
+  .search:focus-within { opacity: 1; }
+
+  .one, .two, .three {
+    width: 100%;
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  .one {
+    border-radius: 999px 0 0 999px;
+    background: #fff;
+    border: 2px solid #3f51b5;
+    border-right: none;
+    height: 56px;
+    z-index: 2;
+  }
+  .two {
+    border-radius: 0 999px 999px 0;
+    background: #fff;
+    border: 2px solid #3f51b5;
+    border-left: none;
+    height: 56px;
+    position: relative;
+    z-index: 2;
+  }
+  .three {
+    flex: 1;
+    height: 100%;
+    overflow: hidden;
+  }
+  .four {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background: transparent;
+    font-size: 20px;
+    padding: 0 20px;
+    outline: none;
+    color: #222;
+  }
+  .four::placeholder {
+    color: #b0b3b8;
+    opacity: 1;
+    font-size: 18px;
+  }
+  .stick {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 32px;
+    height: 32px;
+    background: #3f51b5;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .stick:after {
+    content: '\u2715'; /* X icon */
+    color: #fff;
+    font-size: 18px;
+  }
+  .search:before {
+    content: '';
+    position: absolute;
+    left: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid #3f51b5;
+  }
+  .search:after {
+    content: '';
+    position: absolute;
+    left: 32px;
+    top: 50%;
+    transform: translateY(-50%) rotate(45deg);
+    width: 12px;
+    height: 2px;
+    background: #3f51b5;
+    border-radius: 2px;
+  }
   `
 })
 export class AdminDashboardComponent implements OnInit, OnDestroy {
@@ -1215,13 +1461,18 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
 
   Math = Math;
   loading = false;
-  searchQuery = '';
+  // فصل متغيرات البحث
+  searchAppointmentQuery = '';
+  searchUserQuery = '';
+  private searchAppointmentTimeout: any;
+  private searchUserTimeout: any;
 
   // Data sources
-  appointments: BookingOut[] = [];
-  sliderImages: SliderImage[] = [];
-  users: User[] = [];
+  appointments: any[] = [];
+  sliderImages: any[] = [];
+  users: any[] = [];
   dashboardStats: DashboardStats | null = null;
+  contactMessages: any[] = [];
 
   // Table data
   appointmentColumns = ['patientName', 'phone', 'date', 'time', 'status', 'actions'];
@@ -1284,6 +1535,8 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
 
   // Add property for polling interval
   pollingInterval: any;
+  clinicInfoForm: FormGroup;
+  savingClinicInfo = false;
 
   constructor(
     private clinicService: ClinicService,
@@ -1297,12 +1550,20 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
       end_time: ['', Validators.required],
       status: ['', Validators.required]
     });
+    this.clinicInfoForm = this.fb.group({
+      name: ['', Validators.required],
+      phone: ['', Validators.required],
+      email: ['', [Validators.required, Validators.email]],
+      address: ['', Validators.required]
+    });
   }
 
   ngOnInit() {
     this.loadDashboardData();
     this.loadAvailability();
-    // Polling: refresh dashboard data every 30 seconds
+    this.loadClinicInfo();
+    // لا تحمل رسائل التواصل هنا
+    // this.loadContactMessages();
     this.pollingInterval = setInterval(() => {
       this.loadDashboardData();
     }, 30000);
@@ -1330,17 +1591,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     });
 
     // Load appointments
-    this.clinicService.getAppointments().subscribe({
-      next: (appointments) => {
-        console.log('Appointments data:', appointments);
-        this.appointments = appointments;
-        this.updateRecentAppointments();
-      },
-      error: (error) => {
-        console.error('Error loading appointments:', error);
-        this.snackBar.open('خطأ في تحميل الحجوزات', 'إغلاق', { duration: 3000 });
-      }
-    });
+    this.reloadAppointments();
 
     // Load slider images
     this.clinicService.getSliderImages().subscribe({
@@ -1354,18 +1605,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     });
 
     // Load users
-    this.clinicService.getUsers().subscribe({
-      next: (users) => {
-        this.users = users;
-      },
-      error: (error) => {
-        console.error('Error loading users:', error);
-        this.snackBar.open('خطأ في تحميل المستخدمين', 'إغلاق', { duration: 3000 });
-      },
-      complete: () => {
-        this.loading = false;
-      }
-    });
+    this.reloadUsers();
   }
 
   updateQuickStats(stats: DashboardStats) {
@@ -1416,12 +1656,13 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
 
   // Search appointments
   searchAppointments() {
-    if (this.searchQuery.trim()) {
+    if (this.searchAppointmentQuery.trim()) {
       this.loading = true;
-      this.clinicService.searchAppointments(this.searchQuery).subscribe({
+      this.clinicService.searchAppointments(this.searchAppointmentQuery).subscribe({
         next: (appointments) => {
           this.appointments = appointments;
           this.loading = false;
+          this.updateRecentAppointments();
           if (appointments.length === 0) {
             this.snackBar.open('لم يتم العثور على نتائج', 'إغلاق', { duration: 2000 });
           }
@@ -1432,26 +1673,38 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
         }
       });
     } else {
-      this.loadDashboardData();
+      this.reloadAppointments();
     }
   }
 
-  // Clear search
-  clearSearch() {
-    this.searchQuery = '';
-    this.loadDashboardData();
+  clearSearchAppointments() {
+    this.searchAppointmentQuery = '';
+    this.reloadAppointments();
   }
 
-  // Auto search on input
-  onSearchInput() {
-    // Debounce search to avoid too many API calls
-    if (this.searchQuery.trim().length >= 2) {
-      setTimeout(() => {
+  onSearchInputAppointments() {
+    if (this.searchAppointmentTimeout) clearTimeout(this.searchAppointmentTimeout);
+    if (this.searchAppointmentQuery.trim().length >= 2) {
+      this.searchAppointmentTimeout = setTimeout(() => {
         this.searchAppointments();
       }, 500);
-    } else if (this.searchQuery.trim().length === 0) {
-      this.loadDashboardData();
+    } else if (this.searchAppointmentQuery.trim().length === 0) {
+      this.reloadAppointments();
     }
+  }
+
+  reloadAppointments() {
+    this.loading = true;
+    this.clinicService.getAppointments().subscribe({
+      next: (appointments) => {
+        this.appointments = appointments;
+        this.updateRecentAppointments();
+        this.loading = false;
+      },
+      error: () => {
+        this.loading = false;
+      }
+    });
   }
 
   // Slider actions
@@ -1501,6 +1754,12 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
         }
       });
     }
+  }
+
+  // Placeholder for user edit functionality
+  editUser(user: any) {
+    // TODO: Implement user editing dialog or logic here
+    console.log('Edit user:', user);
   }
 
   // Helper methods for status
@@ -1689,6 +1948,120 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
             this.snackBar.open('حدث خطأ أثناء تعديل الصورة', 'إغلاق', { duration: 3000 });
           }
         });
+      }
+    });
+  }
+
+  logout() {
+    // امسح التوكن من التخزين المحلي
+    localStorage.removeItem('access_token');
+    // أعد التوجيه لصفحة تسجيل الدخول
+    window.location.href = '/login';
+  }
+
+  canEditUser(user: User): boolean {
+    // عدل هذا الشرط حسب منطقك (مثلاً: لا تعدل الأدمن)
+    return user.role !== 'admin';
+  }
+
+  // Search users
+  searchUsers() {
+    if (this.searchUserQuery.trim()) {
+      this.loading = true;
+      this.clinicService.searchUsers(this.searchUserQuery).subscribe({
+        next: (users) => {
+          this.users = users;
+          this.loading = false;
+          if (users.length === 0) {
+            this.snackBar.open('لم يتم العثور على نتائج', 'إغلاق', { duration: 2000 });
+          }
+        },
+        error: (error) => {
+          this.loading = false;
+          this.snackBar.open('خطأ في البحث', 'إغلاق', { duration: 3000 });
+        }
+      });
+    } else {
+      this.reloadUsers();
+    }
+  }
+
+  clearSearchUsers() {
+    this.searchUserQuery = '';
+    this.reloadUsers();
+  }
+
+  onSearchInputUsers() {
+    if (this.searchUserTimeout) clearTimeout(this.searchUserTimeout);
+    if (this.searchUserQuery.trim().length >= 2) {
+      this.searchUserTimeout = setTimeout(() => {
+        this.searchUsers();
+      }, 500);
+    } else if (this.searchUserQuery.trim().length === 0) {
+      this.reloadUsers();
+    }
+  }
+
+  reloadUsers() {
+    this.loading = true;
+    this.clinicService.getUsers().subscribe({
+      next: (users) => {
+        this.users = users;
+        this.loading = false;
+      },
+      error: () => {
+        this.loading = false;
+      }
+    });
+  }
+
+  loadClinicInfo() {
+    this.clinicService.getClinicInfo().subscribe({
+      next: (info: any) => {
+        this.clinicInfoForm.patchValue({
+          name: info.name || '',
+          phone: info.phone || '',
+          email: info.email || '',
+          address: info.address || ''
+        });
+      },
+      error: (err) => {
+        this.snackBar.open('تعذر تحميل بيانات العيادة', 'إغلاق', { duration: 3000 });
+      }
+    });
+  }
+
+  saveClinicInfo() {
+    if (this.clinicInfoForm.invalid) return;
+    this.savingClinicInfo = true;
+    this.clinicService.saveClinicInfo(this.clinicInfoForm.value).subscribe({
+      next: () => {
+        this.snackBar.open('تم حفظ بيانات العيادة بنجاح', 'إغلاق', { duration: 3000 });
+        this.savingClinicInfo = false;
+      },
+      error: () => {
+        this.snackBar.open('حدث خطأ أثناء حفظ البيانات', 'إغلاق', { duration: 3000 });
+        this.savingClinicInfo = false;
+      }
+    });
+  }
+
+  // تحميل رسائل التواصل عند فتح التبويب فقط
+  onTabChange(event: any) {
+    // event.index: رقم التبويب
+    // لنفترض أن تبويب رسائل التواصل هو الأخير
+    if (event.index === 5) {
+      this.loadContactMessages();
+    }
+  }
+
+  loadContactMessages() {
+    this.clinicService.getContactMessages().subscribe({
+      next: (messages: any) => {
+        this.contactMessages = Array.isArray(messages) ? messages : [];
+      },
+      error: () => {
+        this.contactMessages = [];
       }
     });
   }

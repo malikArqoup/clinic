@@ -15,7 +15,6 @@ from ..models.slider_image import SliderImage
 from ..schemas.slider_image import SliderImageCreate, SliderImageUpdate, SliderImageOut
 import os, shutil
 from app.cloudinary_utils import upload_image_to_cloudinary
-from app.schemas.slider_image import SliderImageOut
 from ..schemas.contact import ContactMessageIn, ContactMessageOut
 from ..models.contact import ContactMessageModel
 
@@ -145,14 +144,18 @@ def update_booking_endpoint(
     
     # Convert string times to time objects
     from datetime import datetime
-    start_time_obj = datetime.strptime(booking_update.start_time, '%I:%M %p').time()
-    end_time_obj = datetime.strptime(booking_update.end_time, '%I:%M %p').time()
+    if booking_update.start_time:
+        start_time_obj = datetime.strptime(booking_update.start_time, '%I:%M %p').time()
+        setattr(booking, 'start_time', start_time_obj)
+    if booking_update.end_time:
+        end_time_obj = datetime.strptime(booking_update.end_time, '%I:%M %p').time()
+        setattr(booking, 'end_time', end_time_obj)
     
     # Update booking fields using setattr to avoid SQLAlchemy issues
-    setattr(booking, 'date', booking_update.date)
-    setattr(booking, 'start_time', start_time_obj)
-    setattr(booking, 'end_time', end_time_obj)
-    setattr(booking, 'status', booking_update.status)
+    if booking_update.date:
+        setattr(booking, 'date', booking_update.date)
+    if booking_update.status:
+        setattr(booking, 'status', booking_update.status)
     
     db.commit()
     db.refresh(booking)
@@ -184,6 +187,10 @@ def delete_booking_endpoint(
 def get_slider_images(db: Session = Depends(get_db)):
     return db.query(SliderImage).all()
 
+@router.get("/slider-images", response_model=list[SliderImageOut])
+def get_slider_images_alt(db: Session = Depends(get_db)):
+    return db.query(SliderImage).all()
+
 @router.post("/admin/slider", response_model=SliderImageOut)
 async def create_slider_image(
     title: str = Form(...),
@@ -200,6 +207,44 @@ async def create_slider_image(
 
     # Upload to Cloudinary
     image_url = upload_image_to_cloudinary(contents)
+    
+    # Check if upload was successful
+    if not image_url:
+        raise HTTPException(
+            status_code=500, 
+            detail="Failed to upload image. Please check your Cloudinary configuration."
+        )
+
+    # Store in DB
+    slider = SliderImage(title=title, description=description, image_url=image_url)
+    db.add(slider)
+    db.commit()
+    db.refresh(slider)
+    return slider
+
+@router.post("/slider-images", response_model=SliderImageOut)
+async def create_slider_image_alt(
+    title: str = Form(...),
+    description: str = Form(...),
+    image: UploadFile = File(...),
+    db: Session = Depends(get_db)
+):
+    # Validate file type and size
+    if image.content_type not in ["image/jpeg", "image/png"]:
+        raise HTTPException(status_code=400, detail="Only JPG and PNG images are allowed.")
+    contents = await image.read()
+    if len(contents) > 5 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="Image size must be less than 5MB.")
+
+    # Upload to Cloudinary
+    image_url = upload_image_to_cloudinary(contents)
+    
+    # Check if upload was successful
+    if not image_url:
+        raise HTTPException(
+            status_code=500, 
+            detail="Failed to upload image. Please check your Cloudinary configuration."
+        )
 
     # Store in DB
     slider = SliderImage(title=title, description=description, image_url=image_url)
@@ -215,7 +260,23 @@ def update_slider_image_route(
     db: Session = Depends(get_db),
     current_user: User = Depends(verify_admin)
 ):
-    return update_slider_image(db, image_id, slider_data)
+    slider = db.query(SliderImage).filter(SliderImage.id == image_id).first()
+    if not slider:
+        raise HTTPException(status_code=404, detail="Slider image not found")
+    
+    # Update fields if provided
+    if slider_data.title is not None:
+        setattr(slider, 'title', slider_data.title)
+    if slider_data.description is not None:
+        setattr(slider, 'description', slider_data.description)
+    if slider_data.image_url is not None:
+        setattr(slider, 'image_url', slider_data.image_url)
+    if slider_data.order is not None:
+        setattr(slider, 'order', slider_data.order)
+    
+    db.commit()
+    db.refresh(slider)
+    return slider
 
 @router.delete("/slider-images/{image_id}")
 def delete_slider_image_route(
@@ -223,7 +284,13 @@ def delete_slider_image_route(
     db: Session = Depends(get_db),
     current_user: User = Depends(verify_admin)
 ):
-    return delete_slider_image(db, image_id) 
+    slider = db.query(SliderImage).filter(SliderImage.id == image_id).first()
+    if not slider:
+        raise HTTPException(status_code=404, detail="Slider image not found")
+    
+    db.delete(slider)
+    db.commit()
+    return {"detail": "Slider image deleted successfully"}
 
 @router.post("/contact-us")
 def contact_us(message: ContactMessageIn, db: Session = Depends(get_db)):

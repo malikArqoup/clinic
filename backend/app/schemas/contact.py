@@ -1,17 +1,21 @@
-from pydantic import BaseModel, EmailStr
-from typing import Optional
+from pydantic import BaseModel
 from datetime import datetime
 
 class ContactMessageIn(BaseModel):
     name: str
-    email: EmailStr
-    phone: Optional[str] = None
-    subject: Optional[str] = None
+    email: str
+    phone: str
+    subject: str
     message: str
 
-class ContactMessageOut(ContactMessageIn):
+class ContactMessageOut(BaseModel):
     id: int
+    name: str
+    email: str
+    phone: str
+    subject: str
+    message: str
     created_at: datetime
 
     class Config:
-        orm_mode = True 
+        from_attributes = True 

@@ -1,4 +1,5 @@
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, DateTime
+from datetime import datetime
 from ..core.database import Base
 
 class SliderImage(Base):
@@ -7,4 +8,6 @@ class SliderImage(Base):
     title = Column(String, nullable=False)
     description = Column(String, nullable=False)
     image_url = Column(String, nullable=False)
-    order = Column(Integer, nullable=True, default=0) 
+    order = Column(Integer, nullable=True, default=0)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow) 

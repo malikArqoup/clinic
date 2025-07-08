@@ -228,7 +228,7 @@ export class ClinicService {
   }
 
   getSliderImagesPublic(): Observable<SliderImage[]> {
-    return this.http.get<SliderImage[]>(`${this.apiUrl}/slider/images`);
+    return this.http.get<SliderImage[]>(`${this.apiUrl}/admin/slider-images`);
   }
 
   addSliderImage(formData: FormData): Observable<SliderImage> {
@@ -247,9 +247,11 @@ export class ClinicService {
     });
   }
 
-  deleteSliderImage(id: string): Observable<boolean> {
-    return this.http.delete<boolean>(`${this.apiUrl}/admin/slider-images/${id}`, {
-      headers: this.getAuthHeaders()
+  deleteSliderImage(id: string): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/admin/slider-images/${id}`, {
+      headers: new HttpHeaders({
+        'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+      })
     });
   }
 
@@ -278,6 +280,26 @@ export class ClinicService {
 
   saveBookingSettings(settings: any) {
     return this.http.post(`${this.apiUrl}/admin/booking-settings`, settings, {
+      headers: this.getAuthHeaders()
+    });
+  }
+
+  sendContactMessage(data: any) {
+    return this.http.post(`${this.apiUrl}/admin/contact-us`, data);
+  }
+
+  getContactMessages() {
+    return this.http.get(`${this.apiUrl}/admin/contact-messages`, {
+      headers: this.getAuthHeaders()
+    });
+  }
+
+  getClinicInfo() {
+    return this.http.get(`${this.apiUrl}/settings/clinic-info`);
+  }
+
+  saveClinicInfo(data: any) {
+    return this.http.post(`${this.apiUrl}/settings/clinic-info`, data, {
       headers: this.getAuthHeaders()
     });
   }

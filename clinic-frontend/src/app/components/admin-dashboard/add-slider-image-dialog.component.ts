@@ -79,14 +79,14 @@ export class AddSliderImageDialogComponent {
   }
 
   onSubmit() {
-    if (!this.file || !this.form.value.title) return;
+    if (!this.file) {
+      alert('يجب اختيار صورة!');
+      return;
+    }
     const formData = new FormData();
-    formData.append('file', this.file);
-    formData.append('title', this.form.value.title);
-    formData.append('text', this.form.value.text || '');
-    formData.append('order', '0');
-    formData.append('is_active', 'true');
-    formData.append('is_active', '1');
+    formData.append('image', this.file); // يجب أن يكون 'image'
+    formData.append('title', this.form.value.title || '');
+    formData.append('description', this.form.value.text || '');
     this.dialogRef.close(formData);
   }
 } 

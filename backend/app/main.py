@@ -1,24 +1,15 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from .core.database import engine
-from .models import user, availability, booking, slider_image
+from .core.database import engine, Base
+from .models import user, availability, booking, slider_image, clinic_info
 from .routes import auth, availability as availability_routes, booking as booking_routes
 from .routes import admin as admin_routes
-from .routes import slider as slider_routes, slider as slider_routes_noprefix
-from .routes import clinic_info
-from sqlalchemy.orm import Session
-from fastapi import Depends
-from .core.database import get_db
-from .crud.slider_image import get_slider_images
-from .schemas.slider_image import SliderImageOut
-from typing import List
+from .routes import slider as slider_routes
+from .routes import clinic_info as clinic_info_routes
 
 # Create database tables
-user.Base.metadata.create_all(bind=engine)
-availability.Base.metadata.create_all(bind=engine)
-booking.Base.metadata.create_all(bind=engine)
-slider_image.Base.metadata.create_all(bind=engine)
+Base.metadata.create_all(bind=engine)
 
 # Create FastAPI app
 app = FastAPI(
@@ -32,12 +23,12 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Add CORS middleware
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["http://localhost:4200"],
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_methods=["*"],
     allow_headers=["*"],
 )
 
@@ -49,8 +40,7 @@ app.include_router(availability_routes.router)
 app.include_router(booking_routes.router)
 app.include_router(admin_routes.router)
 app.include_router(slider_routes.router)
-app.include_router(slider_routes.router, prefix="", tags=["slider_noprefix"])
-app.include_router(clinic_info.router)
+app.include_router(clinic_info_routes.router)
 
 @app.get("/")
 async def root():
@@ -65,10 +55,3 @@ async def health_check():
     Health check endpoint.
     """
     return {"status": "healthy"}
-
-@app.get("/admin/slider-images", response_model=List[SliderImageOut])
-def get_slider_images_admin(db: Session = Depends(get_db)):
-    """
-    Endpoint لإدارة السلايدر (admin) لجلب صور السلايدر
-    """
-    return get_slider_images(db)

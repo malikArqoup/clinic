@@ -5,6 +5,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { ClinicService } from '../../services/clinic.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-contact-us',
@@ -26,26 +28,8 @@ import { CommonModule } from '@angular/common';
             <h3 class="form-title">أرسل لنا رسالة</h3>
         <form class="contact-form" (ngSubmit)="onSubmit()">
               <mat-form-field appearance="outline" class="form-field">
-                <mat-label>الاسم الكامل</mat-label>
-                <input matInput required [(ngModel)]="name" name="name" placeholder="أدخل اسمك الكامل">
-                <mat-icon matSuffix>person</mat-icon>
-          </mat-form-field>
-              
-              <mat-form-field appearance="outline" class="form-field">
-            <mat-label>البريد الإلكتروني</mat-label>
-                <input matInput type="email" required [(ngModel)]="email" name="email" placeholder="أدخل بريدك الإلكتروني">
-                <mat-icon matSuffix>email</mat-icon>
-              </mat-form-field>
-              
-              <mat-form-field appearance="outline" class="form-field">
-                <mat-label>رقم الهاتف</mat-label>
-                <input matInput type="tel" [(ngModel)]="phone" name="phone" placeholder="أدخل رقم هاتفك">
-                <mat-icon matSuffix>phone</mat-icon>
-              </mat-form-field>
-              
-              <mat-form-field appearance="outline" class="form-field">
                 <mat-label>موضوع الرسالة</mat-label>
-                <input matInput [(ngModel)]="subject" name="subject" placeholder="أدخل موضوع الرسالة">
+                <input matInput [(ngModel)]="subject" name="subject" placeholder="أدخل موضوع الرسالة" required>
                 <mat-icon matSuffix>subject</mat-icon>
           </mat-form-field>
               
@@ -55,10 +39,11 @@ import { CommonModule } from '@angular/common';
                 <mat-icon matSuffix>message</mat-icon>
           </mat-form-field>
               
-              <button mat-raised-button color="primary" type="submit" class="submit-btn">
+              <button mat-raised-button color="primary" type="submit" class="submit-btn" [disabled]="!isLoggedIn">
                 <mat-icon>send</mat-icon>
                 إرسال الرسالة
               </button>
+              <div *ngIf="!isLoggedIn" style="color: #ef4444; margin-top: 10px;">يجب تسجيل الدخول لإرسال رسالة.</div>
         </form>
           </div>
           
@@ -422,48 +407,53 @@ import { CommonModule } from '@angular/common';
   `
 })
 export class ContactUsComponent {
-  name = '';
-  email = '';
-  phone = '';
   subject = '';
   message = '';
-
-  contactInfo = [
-    {
-      icon: 'location_on',
-      label: 'العنوان',
-      value: 'فلسطين - رام الله، شارع الإرسال'
-    },
-    {
-      icon: 'phone',
-      label: 'الهاتف',
-      value: '0599123456'
-    },
-    {
-      icon: 'email',
-      label: 'البريد الإلكتروني',
-      value: 'info@ramclinic.com'
-    },
-    {
-      icon: 'access_time',
-      label: 'أوقات العمل',
-      value: 'السبت - الخميس: 8:00 ص - 4:00 م'
-    }
-  ];
-
+  isLoggedIn = false;
+  user: any = null;
+  contactInfo: any[] = [];
   workingHours = [
     { day: 'الأحد - الخميس', time: '9:00 ص - 5:00 م' },
     { day: 'الجمعة', time: '10:00 ص - 2:00 م' },
     { day: 'السبت', time: 'مغلق' }
   ];
 
+  constructor(private clinicService: ClinicService, private authService: AuthService) {
+    this.user = this.authService.getCurrentUser();
+    this.isLoggedIn = !!this.user;
+    // جلب معلومات العيادة من الباكند
+    this.clinicService.getClinicInfo().subscribe({
+      next: (info: any) => {
+        this.contactInfo = [
+          { icon: 'location_on', label: 'العنوان', value: info.address },
+          { icon: 'phone', label: 'الهاتف', value: info.phone },
+          { icon: 'email', label: 'البريد الإلكتروني', value: info.email }
+        ];
+      },
+      error: () => {
+        this.contactInfo = [];
+      }
+    });
+  }
+
   onSubmit() {
-    // هنا يمكن إضافة منطق إرسال البيانات
-    alert('تم إرسال رسالتك بنجاح! سنتواصل معك قريباً.');
-    this.name = '';
-    this.email = '';
-    this.phone = '';
-    this.subject = '';
-    this.message = '';
+    if (!this.isLoggedIn) return;
+    const data = {
+      name: this.user?.name,
+      email: this.user?.email,
+      phone: this.user?.phone_number,
+      subject: this.subject,
+      message: this.message
+    };
+    this.clinicService.sendContactMessage(data).subscribe({
+      next: () => {
+        alert('تم إرسال رسالتك بنجاح! سنتواصل معك قريباً.');
+        this.subject = '';
+        this.message = '';
+      },
+      error: () => {
+        alert('حدث خطأ أثناء إرسال الرسالة. حاول مرة أخرى.');
+      }
+    });
   }
 }

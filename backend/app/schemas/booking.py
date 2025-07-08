@@ -1,45 +1,31 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 from datetime import date, time, datetime
 from typing import Optional
 from .user import UserOut
 
-class BookingCreate(BaseModel):
-    """
-    Schema for creating a booking.
-    Fields:
-        date: Date of the booking (YYYY-MM-DD)
-        start_time: Start time (HH:MM am/pm)
-        end_time: End time (HH:MM am/pm)
-    """
+class BookingBase(BaseModel):
     date: date
-    start_time: str  # 'HH:MM am/pm'
-    end_time: str    # 'HH:MM am/pm'
+    start_time: str  # Format: "HH:MM AM/PM"
+    end_time: str    # Format: "HH:MM AM/PM"
+    status: str = "pending"
+
+class BookingCreate(BookingBase):
+    pass
 
 class BookingUpdate(BaseModel):
-    """
-    Schema for updating a booking.
-    Fields:
-        date: Date of the booking (YYYY-MM-DD)
-        start_time: Start time (HH:MM am/pm)
-        end_time: End time (HH:MM am/pm)
-        status: Booking status
-    """
-    date: date
-    start_time: str  # 'HH:MM am/pm'
-    end_time: str    # 'HH:MM am/pm'
-    status: str
+    date: Optional[date] = None
+    start_time: Optional[str] = None  # Format: "HH:MM AM/PM"
+    end_time: Optional[str] = None    # Format: "HH:MM AM/PM"
+    status: Optional[str] = None
 
 class BookingOut(BaseModel):
-    """
-    Schema for booking output.
-    """
     id: int
     user: UserOut
     date: date
-    start_time: str
-    end_time: str
+    start_time: str  # Format: "HH:MM AM/PM"
+    end_time: str    # Format: "HH:MM AM/PM"
     status: str
     created_at: datetime
 
     class Config:
-        orm_mode = True 
+        from_attributes = True 

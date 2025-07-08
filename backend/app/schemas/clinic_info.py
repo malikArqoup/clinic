@@ -1,15 +1,17 @@
 from pydantic import BaseModel
 
-class ClinicInfoBase(BaseModel):
+class ClinicInfoIn(BaseModel):
     name: str
     phone: str
     email: str
     address: str
 
-class ClinicInfoIn(ClinicInfoBase):
-    pass
-
-class ClinicInfoOut(ClinicInfoBase):
+class ClinicInfoOut(BaseModel):
     id: int
+    name: str
+    phone: str
+    email: str
+    address: str
+
     class Config:
-        orm_mode = True 
+        from_attributes = True 
