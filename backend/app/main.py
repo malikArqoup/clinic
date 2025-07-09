@@ -32,8 +32,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ربط مجلد static ليقدم ملفات Angular
-app.mount("/", StaticFiles(directory="static", html=True), name="static")
+# Mount static files for slider images
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 app.include_router(auth.router)
 app.include_router(availability_routes.router)
