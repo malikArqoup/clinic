@@ -1572,6 +1572,29 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    // Check if user is authenticated and is admin
+    const token = localStorage.getItem('access_token');
+    const userData = localStorage.getItem('user_data');
+    
+    if (!token || !userData) {
+      this.snackBar.open('يجب تسجيل الدخول أولاً', 'إغلاق', { duration: 3000 });
+      window.location.href = '/login';
+      return;
+    }
+    
+    try {
+      const user = JSON.parse(userData);
+      if (user.role !== 'admin') {
+        this.snackBar.open('غير مصرح لك بالوصول إلى لوحة الإدارة', 'إغلاق', { duration: 3000 });
+        window.location.href = '/login';
+        return;
+      }
+    } catch (error) {
+      this.snackBar.open('خطأ في بيانات المستخدم', 'إغلاق', { duration: 3000 });
+      window.location.href = '/login';
+      return;
+    }
+    
     this.loadDashboardData();
     this.loadAvailability();
     this.loadClinicInfo();
@@ -1981,8 +2004,9 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   }
 
   logout() {
-    // امسح التوكن من التخزين المحلي
+    // امسح التوكن وبيانات المستخدم من التخزين المحلي
     localStorage.removeItem('access_token');
+    localStorage.removeItem('user_data');
     // أعد التوجيه لصفحة تسجيل الدخول
     window.location.href = '/login';
   }

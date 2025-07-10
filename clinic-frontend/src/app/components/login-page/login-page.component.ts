@@ -56,6 +56,7 @@ import { AuthService } from '../../services/auth.service';
               <span>ليس لديك حساب؟</span>
               <a mat-button routerLink="/register" class="animated-link">إنشاء حساب جديد</a>
             </div>
+
           </form>
         </mat-card-content>
       </mat-card>
@@ -294,6 +295,7 @@ import { AuthService } from '../../services/auth.service';
       color: #4c6ef5;
       text-decoration: underline;
     }
+
     @media (max-width: 600px) {
       .login-card {
         max-width: 98vw;
