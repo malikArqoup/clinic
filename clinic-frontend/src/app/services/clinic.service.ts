@@ -71,7 +71,7 @@ export interface AvailabilityOut {
   providedIn: 'root'
 })
 export class ClinicService {
-  private apiUrl = 'http://localhost:8000'; // FastAPI default port
+  private apiUrl = 'http://localhost:8001'; // FastAPI default port
 
   constructor(private http: HttpClient) {}
 

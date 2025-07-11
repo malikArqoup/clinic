@@ -250,7 +250,7 @@ export class SliderComponent implements OnInit {
   slides: SliderImage[] = [];
   currentSlide = 0;
   intervalId: any;
-  apiUrl: string = 'http://localhost:8000';
+  apiUrl: string = 'http://localhost:8001';
 
   constructor(private clinicService: ClinicService) {}
 
